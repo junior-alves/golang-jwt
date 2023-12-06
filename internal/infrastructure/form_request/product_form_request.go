@@ -1,4 +1,4 @@
-package form
+package form_request
 
 import (
 	"encoding/json"
@@ -8,22 +8,17 @@ import (
 	"github.com/junior-alves/go-test/internal/application"
 )
 
-type FormRequest struct {
+type ProductFormRequest struct {
 	service application.ProductService
 }
 
-func NewFormRequest(service application.ProductService) *FormRequest {
-	return &FormRequest{service: service}
+func NewProductFormRequest(service application.ProductService) *ProductFormRequest {
+	return &ProductFormRequest{service: service}
 }
 
-func httpCommon(w http.ResponseWriter) *http.ResponseWriter {
-	w.Header().Add("Content-Type", "application/json")
-	return &w
-}
+func (f *ProductFormRequest) CreateProductRequest(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
-func (f *FormRequest) CreateProductRequest(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-
-	w = *httpCommon(w)
+	w = *HttpCommon(w)
 
 	type ProductDTO struct {
 		Name  string  `json:"name" validate:"required"`
@@ -42,9 +37,9 @@ func (f *FormRequest) CreateProductRequest(w http.ResponseWriter, r *http.Reques
 	w.Write(res)
 }
 
-func (f *FormRequest) ListProductsRequest(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (f *ProductFormRequest) ListProductsRequest(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
-	w = *httpCommon(w)
+	w = *HttpCommon(w)
 
 	id := p.ByName("id")
 
@@ -61,7 +56,7 @@ func (f *FormRequest) ListProductsRequest(w http.ResponseWriter, r *http.Request
 	w.Write(res)
 }
 
-func (f *FormRequest) getProductById(w http.ResponseWriter, r *http.Request, id string) {
+func (f *ProductFormRequest) getProductById(w http.ResponseWriter, r *http.Request, id string) {
 
 	product, err := f.service.GetProduct(id)
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/junior-alves/go-test/internal/application"
-	form "github.com/junior-alves/go-test/internal/infrastructure/http"
+	"github.com/junior-alves/go-test/internal/infrastructure/form_request"
 	"github.com/junior-alves/go-test/internal/infrastructure/repository"
 )
 
@@ -14,12 +14,14 @@ func main() {
 
 	router := httprouter.New()
 
-	repository := repository.NewMemoryProductRepository()
-	service := application.NewProductService(repository)
-	form := form.NewFormRequest(*service)
+	login_form := form_request.NewLoginFormRequest(*application.NewLoginService())
+	router.POST("/auth/login", login_form.Login)
 
-	router.POST("/product/create", form.CreateProductRequest)
-	router.GET("/product/:id", form.ListProductsRequest)
+	repository := repository.NewMemoryProductRepository()
+	product_form := form_request.NewProductFormRequest(*application.NewProductService(repository))
+
+	router.POST("/product/create", form_request.ValidateToken(product_form.CreateProductRequest))
+	router.GET("/product/:id", form_request.ValidateToken(product_form.ListProductsRequest))
 
 	http.ListenAndServe(":8080", router)
 }
